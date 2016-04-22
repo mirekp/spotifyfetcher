@@ -22,8 +22,6 @@ NSDateFormatter *dateFormatter;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             dateFormatter = [[NSDateFormatter alloc] init];
-            [dateFormatter setDateFormat:@"yyyy-MM-dd"];
-            
         });
     }
     return self;
@@ -36,6 +34,23 @@ NSDateFormatter *dateFormatter;
     if (data)
     {
         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        
+        // Set date persing format based on "release_date_precision" key
+        NSString* releaseDatePrecision = [json objectForKey:@"release_date_precision"];
+        
+        if ([releaseDatePrecision isEqualToString:@"year"])
+        {
+            [dateFormatter setDateFormat:@"yyyy"];
+        }
+        else if ([releaseDatePrecision isEqualToString:@"month"])
+        {
+            [dateFormatter setDateFormat:@"yyyy-MM"];
+        }
+        else
+        {
+            [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+        }
+        
         NSDate *releaseDate = [dateFormatter dateFromString:[json objectForKey:@"release_date"]];
 
         // NSCalendar doesn't like nil values, so let's do sanity check here in case the previous
